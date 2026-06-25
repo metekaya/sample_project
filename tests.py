@@ -65,23 +65,49 @@ def test_flatten_endpoint(client):
 def test_slugify_endpoint(client):
     response = client.post("/slugify", json={"text": "Hello World!"})
     assert response.status_code == 200
-    assert response.get_json() == {"result": "hello_world"}
+    assert response.get_json() == {"result": "hello-world"}
 
 
 def test_mean_endpoint(client):
     response = client.post("/mean", json={"numbers": [1, 2, 3]})
     assert response.status_code == 200
-    assert response.get_json() == {"result": 3.0}
+    assert response.get_json() == {"result": 2.0}
 
 
-def test_median_endpoint_not_implemented(client):
-    with pytest.raises(NotImplementedError):
-        client.post("/median", json={"numbers": [1, 2, 3]})
+def test_median_endpoint_odd(client):
+    response = client.post("/median", json={"numbers": [1, 2, 3]})
+    assert response.status_code == 200
+    assert response.get_json() == {"result": 2}
 
 
-def test_mode_endpoint_not_implemented(client):
-    with pytest.raises(NotImplementedError):
-        client.post("/mode", json={"numbers": [1, 2, 2, 3]})
+def test_median_endpoint_even(client):
+    response = client.post("/median", json={"numbers": [1, 2, 3, 4]})
+    assert response.status_code == 200
+    assert response.get_json() == {"result": 2.5}
+
+
+def test_mode_endpoint_most_frequent(client):
+    response = client.post("/mode", json={"numbers": [1, 2, 2, 3]})
+    assert response.status_code == 200
+    assert response.get_json() == {"result": 2}
+
+
+def test_mode_endpoint_tie_returns_smallest(client):
+    response = client.post("/mode", json={"numbers": [1, 1, 2, 2]})
+    assert response.status_code == 200
+    assert response.get_json() == {"result": 1}
+
+
+def test_invalid_input_returns_bad_request(client):
+    response = client.post("/add", json={"a": "not a number", "b": 3})
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+
+def test_empty_slugify_returns_bad_request(client):
+    response = client.post("/slugify", json={"text": ""})
+    assert response.status_code == 400
+    assert "error" in response.get_json()
 
 
 if __name__ == "__main__":

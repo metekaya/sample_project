@@ -17,5 +17,5 @@ def slugify(text: str) -> str:
     import re
     text = text.lower()
     text = re.sub(r'[^\w\s-]', '', text)
-    text = re.sub(r'\s+', '_', text)   # bug: should be '-' not '_'
+    text = re.sub(r'\s+', '-', text)
     return text.strip()
